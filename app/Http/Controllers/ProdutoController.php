@@ -15,7 +15,7 @@ class ProdutoController extends Controller
         $this->request = $request;
 
         /* Aplicando middleware pelo controller: */
-        $this->middleware(['auth'])->only([     // <-- Adicionando APENAS nos métodos especificado
+        $this->middleware([])->only([     // <-- Adicionando APENAS nos métodos especificado
             'create', 'store', 'edit', 'update', 'destroy'
         ]);
 
@@ -28,9 +28,9 @@ class ProdutoController extends Controller
      */
     public function index()
     {
-        $produtos = ['Protudo 1', 'Produto 2', 'Produto 3'];
-
-        return $produtos;
+        // $produtos = 'Carro BMW 2016';
+        $produtos = ['Carro 1', 'Carro 2', 'Carro 3'];
+        return view('admin.pages.produtos.index', compact('produtos'));
     }
 
     /**
@@ -49,7 +49,7 @@ class ProdutoController extends Controller
      */
     public function create()
     {
-        return 'view com formulário para cadastro de produto';
+        return view('admin.pages.produtos.create');
     }
 
     /**
@@ -57,7 +57,7 @@ class ProdutoController extends Controller
      */
     public function edit($id = null)
     {
-        return "view de edição do produto {$id}";
+        return view('admin.pages.produtos.edit', compact('id'));
     }
 
     /**
@@ -66,9 +66,7 @@ class ProdutoController extends Controller
      */
     public function store(Request $dados)
     {
-        $produto = $dados;
-
-        return 'Cadastrando um novo produto';
+        dd('Cadastrando...');
     }
 
     /**
@@ -77,9 +75,7 @@ class ProdutoController extends Controller
      */
     public function update(Request $dados)
     {
-        $produto = $dados;
-
-        return 'Fazendo update do produto';
+        dd('Fazendo update...');
     }
 
     /**
