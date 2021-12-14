@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreUpdateProduto;
 
 class ProdutoController extends Controller
 {
@@ -64,9 +65,44 @@ class ProdutoController extends Controller
      * CRUD - Cadastrar um novo produto
      * @param  Request $dados
      */
-    public function store(Request $dados)
+    public function store(StoreUpdateProduto $dados)
     {
-        dd('Cadastrando...');
+
+        /* Formas de coletar dados de requisições
+        echo "<pre>";
+            print_r($dados->all());                                 // <-- Pega todos os dados vindo de formulários
+            print_r($dados->only(['nome', 'descricao']));           // <-- Pega somente os dados passados no parametro
+            echo $dados->nome . '</br>';                            // <-- Pega o NOME enviado pelo formulário
+            echo $dados->descricao . '</br>';                       // <-- Pega o DESCRIÇÃO enviado pelo formulário
+            echo $dados->input('nome', 'default') . '</br>';        // <-- Pega o NOME enviado pelo formulário e ou define um valor default para caso não exista
+            echo $dados->input('descricao', 'default') . '</br>';   // <-- Pega o DESCRIÇÃO enviado pelo formulário e ou define um valor default para caso não exista
+            var_dump($dados->has('nome'));                          // <-- verifica se tem aquele valor
+            var_dump($dados->has('descricao'));                     // <-- verifica se tem aquele valor
+            print_r($dados->except('descricao'));                   // <-- Pega todos os dados vindo de formulários EXCETO
+            echo $dados->path() . '</br>';                          // <-- Pega o caminho/path
+        echo "</pre>";
+        dd($dados); */
+
+        /* // Primeira forma de vilidação
+        $dados->validate([
+            'nome' => 'required|min:3|max:255',
+            'descricao' => 'nullable|min:3:|max:255',
+            'imagem' => 'required|image'
+        ]);*/
+
+        /* // Upload arquivos
+        if($dados->imagem->isValid()):
+            echo $dados->imagem->extension();
+            echo $dados->imagem->getClientOriginalName();
+
+            // Podemos configurar onde será armazenado o arquivo em "config/filesystems.php"
+            // dd($dados->file('imagem')->store('produtos'));                                   // <-- faz upload e já nomeia com um nome unico
+
+            $nomeArquivo = $dados->nome . '.' . $dados->imagem->extension();
+            dd($dados->file('imagem')->storeAs('produtos', $nomeArquivo));                       // <-- faz upload e passamos o novo nome do arquivo
+        endif; */
+
+        dd('Tudo OK');
     }
 
     /**

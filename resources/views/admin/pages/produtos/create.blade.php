@@ -4,15 +4,18 @@
 @section('conteudo')
     <h1>Cadastrar novo produto</h1>
 
-    <form class="" action="{{ route('produtos.store') }}" method="POST"> @csrf
-        <input type="text" name="" value="">
-        <input type="text" name="" value="">
-        <button type="submit" name="button">Enviar</button>
+    @if($errors->any())
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    @endif
+
+    <form class="" action="{{ route('produtos.store') }}" method="POST" enctype="multipart/form-data"> @csrf
+        <input type="text" name="nome" value="{{ old('nome') }}">
+        <input type="text" name="descricao" value="{{ old('descricao') }}">
+        <input type="file" name="imagem">
+        <button type="submit">Enviar</button>
     </form>
 @endsection
-
-@push('styles')
-    <style>
-        * {font-family: 'Nunito', sans-serif !important;}
-    </style>
-@endpush

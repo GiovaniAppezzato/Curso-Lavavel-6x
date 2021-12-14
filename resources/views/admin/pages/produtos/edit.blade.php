@@ -5,8 +5,8 @@
     <h1>Editando produto - {{ $id }}</h1>
 
     <form class="" action="{{ route('produtos.update', $id) }}" method="POST"> @csrf @method('PUT')
-        <input type="text" name="" value="">
-        <input type="text" name="" value="">
+        <input type="text" name="nome" value="">
+        <input type="text" name="descricao" value="">
         <button type="submit" name="button">Enviar</button>
     </form>
 @endsection
