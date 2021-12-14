@@ -11,6 +11,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UsersTableSeeder::class);
+        /*
+            Comando para rodar as seeds:
+                . php artisan db:seed                               <-- rodar TODAS as seeds
+                . php artisan db:seed --class=UsersTableSeeder      <-- rodar as seeders da tabela Users
+        */
+        $this->call(UsersTableSeeder::class);
     }
 }
