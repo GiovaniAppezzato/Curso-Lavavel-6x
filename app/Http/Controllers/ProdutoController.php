@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Produto;
 use App\Http\Requests\StoreUpdateProduto;
 
 class ProdutoController extends Controller
@@ -10,10 +12,11 @@ class ProdutoController extends Controller
     protected $request;
 
     /* Injeção de dependedencias - injetar instancias de classe em qualquer método */
-    public function __construct(Request $request)
+    public function __construct(Request $request, Produto $produto)
     {
         // dd($request);
         $this->request = $request;
+        $this->model = $produto;
 
         /* Aplicando middleware pelo controller: */
         $this->middleware([])->only([     // <-- Adicionando APENAS nos métodos especificado
@@ -29,9 +32,12 @@ class ProdutoController extends Controller
      */
     public function index()
     {
-        // $produtos = 'Carro BMW 2016';
-        $produtos = ['Carro 1', 'Carro 2', 'Carro 3'];
-        return view('admin.pages.produtos.index', compact('produtos'));
+        // $produtos =  Produto::all();
+        // $produtos =  Produto::get();
+        $produtos = Produto::paginate(25);
+
+        // dd($produtos);
+        return view('admin.pages.produtos.index', ['produtos' => $produtos]);
     }
 
     /**
@@ -40,9 +46,13 @@ class ProdutoController extends Controller
      */
     public function show($id = null)
     {
-        $produto = $id;
+        $produto = Produto::where('id', '=', $id)->first();
+        // $produto = Produto::find($id);
+        // $produto = Produto::findOrFail($id);
 
-        return "Exibindo o produto {$produto}";
+        return !$produto ? redirect()->back() : view('admin.pages.produtos.show', ['produto' => $produto]);
+
+        // dd($produto);
     }
 
     /**
@@ -58,60 +68,102 @@ class ProdutoController extends Controller
      */
     public function edit($id = null)
     {
-        return view('admin.pages.produtos.edit', compact('id'));
+        $produto = Produto::findOrFail($id);
+        return view('admin.pages.produtos.edit', ['produto' => $produto]);
     }
 
     /**
      * CRUD - Cadastrar um novo produto
      * @param  Request $dados
      */
-    public function store(StoreUpdateProduto $dados)
+    public function store(StoreUpdateProduto $request)
     {
-
         /* Formas de coletar dados de requisições
         echo "<pre>";
-            print_r($dados->all());                                 // <-- Pega todos os dados vindo de formulários
-            print_r($dados->only(['nome', 'descricao']));           // <-- Pega somente os dados passados no parametro
-            echo $dados->nome . '</br>';                            // <-- Pega o NOME enviado pelo formulário
-            echo $dados->descricao . '</br>';                       // <-- Pega o DESCRIÇÃO enviado pelo formulário
-            echo $dados->input('nome', 'default') . '</br>';        // <-- Pega o NOME enviado pelo formulário e ou define um valor default para caso não exista
-            echo $dados->input('descricao', 'default') . '</br>';   // <-- Pega o DESCRIÇÃO enviado pelo formulário e ou define um valor default para caso não exista
-            var_dump($dados->has('nome'));                          // <-- verifica se tem aquele valor
-            var_dump($dados->has('descricao'));                     // <-- verifica se tem aquele valor
-            print_r($dados->except('descricao'));                   // <-- Pega todos os dados vindo de formulários EXCETO
-            echo $dados->path() . '</br>';                          // <-- Pega o caminho/path
+            print_r($request->all());                                 // <-- Pega todos os dados vindo de formulários
+            print_r($request->only(['nome', 'descricao']));           // <-- Pega somente os dados passados no parametro
+            echo $request->nome . '</br>';                            // <-- Pega o NOME enviado pelo formulário
+            echo $request->descricao . '</br>';                       // <-- Pega o DESCRIÇÃO enviado pelo formulário
+            echo $request->input('nome', 'default') . '</br>';        // <-- Pega o NOME enviado pelo formulário e ou define um valor default para caso não exista
+            echo $$request->input('descricao', 'default') . '</br>';   // <-- Pega o DESCRIÇÃO enviado pelo formulário e ou define um valor default para caso não exista
+            var_dump($request->has('nome'));                          // <-- verifica se tem aquele valor
+            var_dump($request->has('descricao'));                     // <-- verifica se tem aquele valor
+            print_r($request->except('descricao'));                   // <-- Pega todos os dados vindo de formulários EXCETO
+            echo $request->path() . '</br>';                          // <-- Pega o caminho/path
         echo "</pre>";
-        dd($dados); */
+        dd($request); */
 
         /* // Primeira forma de vilidação
-        $dados->validate([
+        $request->validate([
             'nome' => 'required|min:3|max:255',
             'descricao' => 'nullable|min:3:|max:255',
             'imagem' => 'required|image'
         ]);*/
 
         /* // Upload arquivos
-        if($dados->imagem->isValid()):
-            echo $dados->imagem->extension();
-            echo $dados->imagem->getClientOriginalName();
+        if($request->imagem->isValid()):
+            echo $request->imagem->extension();
+            echo $request->imagem->getClientOriginalName();
 
             // Podemos configurar onde será armazenado o arquivo em "config/filesystems.php"
-            // dd($dados->file('imagem')->store('produtos'));                                   // <-- faz upload e já nomeia com um nome unico
+            // dd($request->file('imagem')->store('produtos'));                                   // <-- faz upload e já nomeia com um nome unico
 
-            $nomeArquivo = $dados->nome . '.' . $dados->imagem->extension();
-            dd($dados->file('imagem')->storeAs('produtos', $nomeArquivo));                       // <-- faz upload e passamos o novo nome do arquivo
+            $nomeArquivo = $request->nome . '.' . $request->imagem->extension();
+            dd($request->file('imagem')->storeAs('produtos', $nomeArquivo));                       // <-- faz upload e passamos o novo nome do arquivo
         endif; */
 
-        dd('Tudo OK');
+        /*
+        $produto = new Produto();
+        $produto->nome = $request->nome;
+        $produto->descricao = $request->descricao;
+        $produto->valor = $request->valor;
+        $produto->save(); */
+
+        $dados = $request->all();
+
+        if($request->hasFile('imagem') && $request->imagem->isValid()):
+            $arquivo = $request->imagem;
+            $extensao = $arquivo->extension();
+            $imagemNome = md5($arquivo->getClientOriginalName() . strtotime('now')) . "." . $extensao;
+
+            $request->imagem->storeAs('produtos', $imagemNome);
+            $dados['imagem'] = $imagemNome;
+        endif;
+
+        Produto::create($dados);
+
+        return redirect()
+                ->route('produtos.index')
+                ->with('success', 'Produto cadastrado com sucesso!');
     }
 
     /**
      * CRUD - Atualizar registro no banco de dados
      * @param  Request $dados
      */
-    public function update(Request $dados)
+    public function update(StoreUpdateProduto $request, $id)
     {
-        dd('Fazendo update...');
+        $produto = Produto::find($id);
+        if(!$produto)
+            return redirect()->back();
+
+        $dados = $request->all();
+
+        if($request->hasFile('imagem') && $request->imagem->isValid()):
+            if($produto->imagem && Storage::exists("produtos/{$produto->imagem}")):
+                Storage::delete("produtos/{$produto->imagem}");
+            endif;
+
+            $arquivo = $request->imagem;
+            $extensao = $arquivo->extension();
+            $imagemNome = md5($arquivo->getClientOriginalName() . strtotime('now')) . "." . $extensao;
+
+            $request->imagem->storeAs('produtos', $imagemNome);
+            $dados['imagem'] = $imagemNome;
+        endif;
+
+        $produto->update($dados);
+        return redirect()->route('produtos.index');
     }
 
     /**
@@ -120,6 +172,29 @@ class ProdutoController extends Controller
      */
     public function destroy($id = null)
     {
-        return "Deletando o produto com id {$produto}";
+        $produto = Produto::findOrFail($id);
+
+        if($produto->imagem && Storage::exists("produtos/{$produto->imagem}")):
+            Storage::delete("produtos/{$produto->imagem}");
+        endif;
+
+        $produto->delete();
+
+        return redirect()->route('produtos.index');
+    }
+
+    /**
+     * filtrar produtos
+     * @param  Request $request
+     */
+    public function search(Request $request)
+    {
+        $filtros = $request->except('_token');
+
+        $produtos = $this->model->search($request->filtro);
+        return view('admin.pages.produtos.index', [
+            'produtos' => $produtos,
+            'filtros' => $filtros
+        ]);
     }
 }

@@ -21,6 +21,7 @@ Route::get('/login', function() {
 
 // Comando artisan para criar resource: php artisan make:controller <name> --resource
 Route::resource('usuarios', 'ResourceController');
+Route::any('/produtos/search', 'ProdutoController@search')->name('produtos.search');
 Route::resource('produtos', 'ProdutoController');
 
 /*

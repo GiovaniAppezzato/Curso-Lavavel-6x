@@ -17,5 +17,6 @@ class DatabaseSeeder extends Seeder
                 . php artisan db:seed --class=UsersTableSeeder      <-- rodar as seeders da tabela Users
         */
         $this->call(UsersTableSeeder::class);
+        $this->call(ProdutosTableSeeder::class);
     }
 }

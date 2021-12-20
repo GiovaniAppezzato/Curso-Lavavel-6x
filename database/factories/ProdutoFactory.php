@@ -2,11 +2,13 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use App\Models\User;
+use App\Models\Produto;
 use Faker\Generator as Faker;
 
-$factory->define(User::class, function (Faker $faker) {
+$factory->define(Produto::class, function (Faker $faker) {
     return [
-        // Comando que criou esse factory: php artisan make:factory ProdutoFactory --model=Models\User
+        'nome' => $faker->unique()->word,
+        'descricao' => $faker->sentence,
+        'valor' => 15.2
     ];
 });
